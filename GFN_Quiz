@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <title>LF00-LF06 Quiz</title>
+  <style>
+    body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
+    .quiz-container {
+      max-width: 800px; margin: auto; background: white;
+      padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h2, label, select { margin-bottom: 15px; display: block; }
+    .answer {
+      display: block; margin: 10px 0; padding: 10px;
+      border: 1px solid #ccc; border-radius: 5px; cursor: pointer;
+      background-color: #333; color: white; width: 100%; text-align: left;
+    }
+    .answer:hover:not(.disabled) { background-color: #555; }
+    .answer.correct { background-color: #28a745; color: white; }
+    .answer.incorrect { background-color: #dc3545; color: white; }
+    .answer.disabled { cursor: not-allowed; }
+    button#next-btn {
+      background-color: #007bff; color: white;
+      border: none; padding: 10px 15px;
+      border-radius: 5px; cursor: pointer;
+      margin-top: 20px; margin-right: 10px;
+    }
+    button#next-btn:hover { background-color: #0056b3; }
+    #score, #feedback { margin-top: 20px; font-weight: bold; }
+    #feedback.correct { color: #28a745; }
+    #feedback.incorrect { color: #dc3545; }
+  </style>
+</head>
+<body>
+<div class="quiz-container">
+  <label for="lf-filter">Lernfeld wählen:</label>
+  <select id="lf-filter">
+    <option value="all">Alle</option>
+    <option value="LF00">LF00</option>
+    <option value="LF01">LF01</option>
+    <option value="LF02">LF02</option>
+    <option value="LF03">LF03</option>
+    <option value="LF04">LF04</option>
+    <option value="LF05">LF05</option>
+    <option value="LF06">LF06</option>
+  </select>
+
+  <p id="progress">Frage 0 von 0</p>
+  <h2 id="question">Frage wird geladen...</h2>
+  <div id="answers"></div>
+  <p id="feedback"></p>
+  <p id="score">Punktestand: 0</p>
+  <p id="stats">Beantwortet: 0 | Richtig: 0 | Falsch: 0</p>
+  <button id="next-btn" style="display: none;">Weiter</button>
+</div>
+<script>
+const allQuestions = [
+  // LF00 - Newly Added Questions
+  // Teamentwicklung
+  { lf: "LF00", question: "Wie lautet die korrekte Reihenfolge der Phasen der Teamentwicklung laut dem Dokument?", answers: ["Forming, Storming, Norming, Performing, Adjourning", "Performing, Forming, Norming, Storming, Adjourning", "Storming, Norming, Forming, Performing, Adjourning", "Adjourning, Performing, Storming, Norming, Forming"], correct: 0 },
+  { lf: "LF00", question: "Welche Abkürzung wird für die Phasen der Teamentwicklung verwendet?", answers: ["FSNPA", "PFNSA", "AFNSP", "SPNFA"], correct: 1 },
+  { lf: "LF00", question: "In welcher Phase der Teamentwicklung treten häufig Konflikte und Spannungen auf?", answers: ["Performing", "Forming", "Storming", "Norming"], correct: 2 },
+  { lf: "LF00", question: "Was ist der Hauptfokus der Norming-Phase in der Teamentwicklung?", answers: ["Abschluss des Projekts", "Entwicklung gemeinsamer Normen und Regeln", "Konfliktlösung", "Kennenlernen der Teammitglieder"], correct: 1 },
+  { lf: "LF00", question: "Was sollte in Teamdiskussionen vermieden werden, um Konflikte zu verhindern?", answers: ["Technische Fähigkeiten", "Emotionale Themen wie Politik und Religion", "Aufgabenverteilung", "Projektplanung"], correct: 1 },
+  { lf: "LF00", question: "Warum sollte man im Team „Wir“ statt „Du“ verwenden?", answers: ["Um Aufgaben zuzuweisen", "Um direkte Kritik zu vermeiden", "Um Rollen zu klären", "Um Diskussionen zu beschleunigen"], correct: 1 },
+  { lf: "LF00", question: "Was ist laut dem Dokument die häufigste Ursache für Konflikte in Teams?", answers: ["Schlechtes Zeitmanagement", "Konstruktivismus", "Mangel an technischen Fähigkeiten", "Unausgerichtete Ziele"], correct: 1 },
+  { lf: "LF00", question: "Welche Phase der Teamentwicklung ist die Leistungsphase?", answers: ["Forming", "Storming", "Norming", "Performing"], correct: 3 },
+  { lf: "LF00", question: "Was passiert in der Adjourning-Phase?", answers: ["Das Team wird gebildet", "Konflikte werden gelöst", "Das Projekt wird abgeschlossen oder das Team löst sich auf", "Gemeinsame Regeln werden entwickelt"], correct: 2 },
+  { lf: "LF00", question: "Was ist ein wichtiger Aspekt der Aufgabenverteilung im Team?", answers: ["Aufgaben zufällig verteilen", "Aufgaben nach den Stärken der Personen aufteilen", "Alle Aufgaben von einer Person erledigen lassen", "Aufgaben nur nach Erfahrung verteilen"], correct: 1 },
+  { lf: "LF00", question: "Warum ist ein Projektablaufplan (PAP) wichtig?", answers: ["Um die Kosten zu senken", "Um unterschiedliche Arbeitsweisen zu harmonisieren", "Um den Teamgeist zu schwächen", "Um Deadlines zu ignorieren"], correct: 1 },
+  { lf: "LF00", question: "Welche Themen sollten in einem Team nicht diskutiert werden?", answers: ["Technische Details", "Emotionale Themen wie Politik und Religion", "Projektziele", "Zeitmanagement"], correct: 1 },
+  { lf: "LF00", question: "Was ist ein Vorteil der Verwendung von „Ich-Botschaften“ in der Kommunikation?", answers: ["Sie erhöhen die Konfliktwahrscheinlichkeit", "Sie fördern eine wertschätzende Kommunikation", "Sie machen die Kommunikation komplizierter", "Sie ersetzen Teamregeln"], correct: 1 },
+  { lf: "LF00", question: "Welches Element gehört nicht zu den vier Elementen der Ich-Botschaft?", answers: ["Beobachten", "Gefühl", "Bedürfnis", "Bewertung"], correct: 3 },
+  { lf: "LF00", question: "Was ist die Abkürzung für die vier Elemente der Ich-Botschaft?", answers: ["Ich-BGBB", "Ich-FBGB", "Ich-BFGB", "Ich-GBFB"], correct: 0 },
+  { lf: "LF00", question: "Was bedeutet „Beobachten“ in einer Ich-Botschaft?", answers: ["Eine Bewertung abgeben", "Das Gesehene ohne Bewertung beschreiben", "Eine Bitte formulieren", "Ein Gefühl ausdrücken"], correct: 1 },
+  { lf: "LF00", question: "Wie sollte man laut dem Dokument mit Kollegen umgehen?", answers: ["Aggressiv und vorwurfsvoll", "So, wie man selbst behandelt werden möchte", "Mit Ignoranz", "Nur mit direkter Kritik"], correct: 1 },
+  { lf: "LF00", question: "Was ist ein Ziel der Forming-Phase?", answers: ["Produktive Zusammenarbeit", "Konfliktlösung", "Teammitglieder lernen sich kennen", "Projektabschluss"], correct: 2 },
+  { lf: "LF00", question: "Warum ist es wichtig, Konflikte in der Storming-Phase konstruktiv zu bearbeiten?", answers: ["Um die Teamziele zu ignorieren", "Um eine gemeinsame Basis zu finden", "Um neue Mitglieder aufzunehmen", "Um die Arbeitsweise zu ändern"], correct: 1 },
+  { lf: "LF00", question: "Welche Phase folgt auf die Norming-Phase?", answers: ["Forming", "Storming", "Performing", "Adjourning"], correct: 2 },
+  { lf: "LF00", question: "Was ist ein Merkmal der Performing-Phase?", answers: ["Unsicherheit und Zurückhaltung", "Effiziente und effektive Zielerreichung", "Konflikte und Spannungen", "Entwicklung von Regeln"], correct: 1 },
+  { lf: "LF00", question: "Was sollte ein Team in der Adjourning-Phase tun?", answers: ["Neue Mitglieder aufnehmen", "Die Zusammenarbeit reflektieren", "Konflikte lösen", "Neue Regeln entwickeln"], correct: 1 },
+  { lf: "LF00", question: "Was ist ein Vorteil der Aufgabenverteilung nach Stärken?", answers: ["Es erhöht die Konfliktwahrscheinlichkeit", "Es optimiert die Teamleistung", "Es verlangsamt die Zusammenarbeit", "Es ignoriert individuelle Fähigkeiten"], correct: 1 },
+  { lf: "LF00", question: "Was sollte bei der Kommunikation im Team vermieden werden?", answers: ["Aktives Zuhören", "Schuldzuweisungen", "Ich-Botschaften", "Kompromisse"], correct: 1 },
+  { lf: "LF00", question: "Welches Tool wird empfohlen, um GFN-Aufgaben präsentierbar zu machen?", answers: ["Excel", "PowerPoint", "Notepad", "Paint"], correct: 1 },
+  { lf: "LF00", question: "Was ist ein Ziel der Konfliktfreien Kommunikation?", answers: ["Vorwürfe und Bewertungen ausdrücken", "Wertschätzung als Basis nutzen", "Emotionale Themen diskutieren", "Direkte Kritik fördern"], correct: 1 },
+  { lf: "LF00", question: "Welche Aussage beschreibt die Storming-Phase am besten?", answers: ["Teammitglieder lernen sich kennen", "Unterschiedliche Arbeitsstile prallen aufeinander", "Gemeinsame Normen werden entwickelt", "Das Team erreicht seine Ziele effizient"], correct: 1 },
+  { lf: "LF00", question: "Was ist ein wichtiger Aspekt der Ich-Botschaft „Bedürfnis“?", answers: ["Eine Bewertung abgeben", "Das Bedürfnis aus dem Gefühl äußern", "Eine direkte Kritik formulieren", "Konflikte ignorieren"], correct: 1 },
+  { lf: "LF00", question: "Warum ist es wichtig, Regeln für die Teamarbeit festzulegen?", answers: ["Um Konflikte zu fördern", "Um effektive Zusammenarbeit zu ermöglichen", "Um Aufgaben zufällig zu verteilen", "Um Deadlines zu ignorieren"], correct: 1 },
+  { lf: "LF00", question: "Welche Phase der Teamentwicklung ist die Orientierungsphase?", answers: ["Performing", "Forming", "Norming", "Storming"], correct: 1 },
+  { lf: "LF00", question: "Was ist ein Ziel der Norming-Phase?", answers: ["Konflikte verstärken", "Zusammengehörigkeitsgefühl entwickeln", "Projekt abschließen", "Unsicherheit fördern"], correct: 1 },
+  { lf: "LF00", question: "Was ist ein Vorteil der Verwendung eines Projektablaufplans (PAP)?", answers: ["Er erschwert die Zusammenarbeit", "Er harmonisiert unterschiedliche Arbeitsweisen", "Er ignoriert individuelle Stärken", "Er verzögert Deadlines"], correct: 1 },
+  { lf: "LF00", question: "Welche Aussage trifft auf die Performing-Phase zu?", answers: ["Teammitglieder sind unsicher", "Teammitglieder nutzen ihre Stärken optimal", "Konflikte dominieren die Zusammenarbeit", "Regeln werden neu definiert"], correct: 1 },
+  { lf: "LF00", question: "Was sollte man bei der Formulierung von Ich-Botschaften vermeiden?", answers: ["Beobachtungen beschreiben", "Gefühle ausdrücken", "Vorwürfe machen", "Bedürfnisse äußern"], correct: 2 },
+  { lf: "LF00", question: "Was ist ein Merkmal der Adjourning-Phase?", answers: ["Teamgründung", "Reflektion der Zusammenarbeit", "Konfliktlösung", "Entwicklung von Normen"], correct: 1 },
+  { lf: "LF00", question: "Warum ist aktives Zuhören in der Teamkommunikation wichtig?", answers: ["Es fördert Missverständnisse", "Es verbessert das Verständnis und die Zusammenarbeit", "Es ignoriert Emotionen", "Es erhöht die Konfliktwahrscheinlichkeit"], correct: 1 },
+  { lf: "LF00", question: "Welche Rolle spielt die „Bitte“ in einer Ich-Botschaft?", answers: ["Eine Bewertung abgeben", "Eine konstruktive Bitte formulieren", "Konflikte ignorieren", "Gefühle unterdrücken"], correct: 1 },
+  { lf: "LF00", question: "Was ist ein Ziel der Konfliktfreien Kommunikation?", answers: ["Vorwürfe ausdrücken", "Kompromisse zulassen", "Emotionale Themen fördern", "Direkte Kritik ausüben"], correct: 1 },
+  { lf: "LF00", question: "Welche Aussage beschreibt die Forming-Phase am besten?", answers: ["Produktive Zusammenarbeit", "Unsicherheit und Zurückhaltung", "Entwicklung gemeinsamer Normen", "Effiziente Zielerreichung"], correct: 1 },
+  { lf: "LF00", question: "Was ist ein wichtiger Aspekt der Aufgabenverteilung im Team?", answers: ["Aufgaben zufällig verteilen", "Aufgaben nach individuellen Stärken zuweisen", "Aufgaben ignorieren", "Aufgaben nur einer Person zuweisen"], correct: 1 },
+  
+  // Lernen lernen
+  { lf: "LF00", question: "Welcher Schritt gehört nicht zum Prozess des Lernens?", answers: ["Wahrnehmen", "Verarbeiten", "Ignorieren", "Üben"], correct: 2 },
+  { lf: "LF00", question: "Was ist der erste Schritt im Lernprozess laut dem Dokument?", answers: ["Verarbeiten", "Wahrnehmen", "Individualisieren", "Kreativität"], correct: 1 },
+  { lf: "LF00", question: "Wie lange sollte man täglich lernen, um Inhalte zu vertiefen?", answers: ["5 Minuten", "10 Minuten", "30 Minuten", "1 Stunde"], correct: 1 },
+  { lf: "LF00", question: "Was ist ein Ziel der Feynman-Methode?", answers: ["Schnelles Lesen", "Tiefes Verständnis durch einfache Erklärungen", "Multitasking", "Konfliktlösung"], correct: 1 },
+  { lf: "LF00", question: "Welcher Schritt gehört zur Feynman-Methode?", answers: ["Konflikte identifizieren", "Thema in einfachen Worten erklären", "Aufgaben delegieren", "Zeitmanagement planen"], correct: 1 },
+  { lf: "LF00", question: "Wie viele Lerntypen gibt es laut dem Dokument?", answers: ["2", "3", "4", "5"], correct: 2 },
+  { lf: "LF00", question: "Was beschreibt die Feynman-Methode am besten?", answers: ["Schnelles Lesen von Texten", "Erklärung eines Themas in einfachen Worten", "Erstellung von Diagrammen", "Multitasking"], correct: 1 },
+  { lf: "LF00", question: "Was ist ein Merkmal der LOCI-Methode?", answers: ["Schnelles Lesen", "Verknüpfung von Informationen mit Orten", "Erstellung von Tabellen", "Konfliktlösung"], correct: 1 },
+  { lf: "LF00", question: "Was bedeutet die Abkürzung SQR3 in der SQR3-Technik?", answers: ["Study, Question, Read, Review, Repeat", "Survey, Question, Read, Recite, Review", "Search, Query, Read, Repeat, Review", "Study, Query, Recite, Read, Review"], correct: 1 },
+  { lf: "LF00", question: "Was ist ein Vorteil der Mindmapping-Technik?", answers: ["Sie erhöht die Lesegeschwindigkeit", "Sie visualisiert Beziehungen zwischen Begriffen", "Sie ignoriert Lerninhalte", "Sie fördert Multitasking"], correct: 1 },
+  { lf: "LF00", question: "Welche Technik zielt darauf ab, mehrere Wörter gleichzeitig zu erfassen?", answers: ["Feynman-Methode", "Speed-Reading", "LOCI-Methode", "SQR3-Technik"], correct: 1 },
+  { lf: "LF00", question: "Welche Methode wird auch als Gedächtnispalast bezeichnet?", answers: ["SQR3-Technik", "LOCI-Methode", "Mindmapping", "Karteikarten"], correct: 1 },
+  { lf: "LF00", question: "Welche Lernmethode verwendet Karteikarten?", answers: ["Feynman-Methode", "Speed-Reading", "Karteikarten-Methode", "Mindmapping"], correct: 2 },
+  { lf: "LF00", question: "Welche Technik hilft bei der strukturierten Aufnahme wissenschaftlicher Texte?", answers: ["Feynman-Methode", "Speed-Reading", "SQR3-Technik", "Karteikarten"], correct: 2 },
+  { lf: "LF00", question: "Welche Methode wird für die Erstellung von Karteikarten empfohlen?", answers: ["Anki", "PowerPoint", "Excel", "Notepad"], correct: 0 },
+  { lf: "LF00", question: "Welche Methode hilft bei der Memorierung durch räumliche Verknüpfung?", answers: ["Feynman-Methode", "Speed-Reading", "LOCI-Methode", "Karteikarten"], correct: 2 },
+
+  // Zeitmanagement
+  { lf: "LF00", question: "Was bedeutet die Abkürzung SMART in der SMART-Methode?", answers: ["Spezifisch, Messbar, Akzeptiert, Realistisch, Terminiert", "Schnell, Messbar, Attraktiv, Realistisch, Terminiert", "Spezifisch, Machbar, Akzeptiert, Rational, Terminiert", "Schnell, Machbar, Attraktiv, Rational, Terminiert"], correct: 0 },
+  { lf: "LF00", question: "Was ist ein Ziel der Pomodoro-Technik?", answers: ["Schnelles Lesen", "Strukturierte Arbeits- und Pausenzeiten", "Konfliktlösung", "Multitasking"], correct: 1 },
+  { lf: "LF00", "question": "Welche Aussage beschreibt das Pareto-Prinzip am besten?", "answers": ["20 % der Zeit bringen 80 % der Ergebnisse", "50 % der Zeit bringen 50 % der Ergebnisse", "80 % der Zeit bringen 20 % der Ergebnisse", "10 % der Zeit bringen 90 % der Ergebnisse"], "correct": 0 },
+  { lf: "LF00", "question": "Welche Technik hilft bei der Priorisierung von Aufgaben?", "answers": ["Speed-Reading", "ABC-Analyse", "LOCI-Methode", "Feynman-Methode"], "correct": 1 },
+
+  // Informationsbeschaffung
+  { lf: "LF00", question: "Welche Suchoperation sucht nach einem genauen Ausdruck in der angegebenen Reihenfolge?", answers: ["+", "\"", "-", "*"], correct: 1 },
+  { lf: "LF00", question: "Welcher CMD-Befehl zeigt alle Dateien und Verzeichnisse im aktuellen Ordner an?", answers: ["tree", "dir", "cd", "mkdir"], correct: 1 },
+  { lf: "LF00", question: "Welcher CMD-Befehl erstellt ein neues Verzeichnis?", answers: ["dir", "tree", "mkdir", "copy"], correct: 2 },
+  { lf: "LF00", "question": "Welche Suchoperation sucht nach Wörtern im Titel einer Website?", "answers": ["intitle:", "inurl:", "site:", "filetype:"], "correct": 0 },
+
+  // Die Umschulung
+  { lf: "LF00", question: "Welche Lernfelder umfasst die AP1-Prüfung?", answers: ["Lernfeld 1 bis 6", "Lernfeld 7 bis 13", "Lernfeld 1 bis 13", "Lernfeld 6 bis 12"], correct: 0 },
+  { lf: "LF00", question: "Wie viel Prozent zählen Präsentation und Fachgespräch in der Bewertung?", answers: ["25 %", "50 %", "75 %", "100 %"], correct: 1 },
+  { lf: "LF00", question: "Welche Kleidung wird für Präsentationen empfohlen?", answers: ["Sportkleidung", "Business Casual", "Freizeitkleidung", "Abendgarderobe"], correct: 1 },
+  { lf: "LF00", question: "Welche Ziffern werden im Dezimalsystem verwendet?", answers: ["0-9", "0-1", "0-9 und A-F", "0-7"], correct: 0 },
+  { lf: "LF00", question: "Welche Ziffern werden im Binärsystem verwendet?", answers: ["0-9", "0-1", "0-9 und A-F", "0-7"], correct: 1 },
+  { lf: "LF00", "question": "Welche Ziffern werden im Hexadezimalsystem verwendet?", "answers": ["0-9", "0-1", "0-9 und A-F", "0-7"], correct: 2 },
+  { lf: "LF00", question: "Welches Zahlensystem hat die Basis 10?", answers: ["Dezimalsystem", "Binärsystem", "Hexadezimalsystem", "Oktalsystem"], correct: 0 },
+
+  // LF01 Questions
+  { "lf": "LF01", "question": "What is a component of active listening for IT apprentices?", "answers": ["Writing code", "Fully focusing on the speaker", "Updating software", "Designing hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "How does clear communication benefit apprentices?", "answers": ["Improves coding skills", "Enhances task clarity", "Ensures legal compliance", "Upgrades hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a key communication skill for IT apprentices?", "answers": ["Software development", "Asking clarifying questions", "Network configuration", "Hardware troubleshooting"], "correct": 1 },
+  { "lf": "LF01", "question": "Why is written communication important for apprentices?", "answers": ["Enhances coding", "Documents tasks", "Ensures legal compliance", "Upgrades hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "How can apprentices improve team collaboration?", "answers": ["By writing code", "By sharing ideas", "By ensuring compliance", "By upgrading hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a benefit of professional communication?", "answers": ["Improves coding", "Builds trust", "Ensures compliance", "Enhances hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "Why is feedback important in communication?", "answers": ["Improves coding", "Enhances performance", "Ensures compliance", "Upgrades hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "How does active listening prevent errors?", "answers": ["By writing code", "By clarifying instructions", "By ensuring compliance", "By upgrading hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a strategy for effective communication?", "answers": ["Software updates", "Clear expression", "Legal compliance", "Hardware upgrades"], "correct": 1 },
+  { "lf": "LF01", "question": "Why is communication critical for IT projects?", "answers": ["Improves coding", "Ensures success", "Ensures compliance", "Enhances hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "Why are soft skills important for IT apprentices?", "answers": ["Enhance coding", "Aid career success", "Ensure compliance", "Upgrade hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is an example of a soft skill for apprentices?", "answers": ["Software coding", "Teamwork", "Network security", "Hardware repair"], "correct": 1 },
+  { "lf": "LF01", "question": "How do soft skills complement technical skills?", "answers": ["By improving coding", "By enhancing employability", "By ensuring compliance", "By upgrading hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "Why is problem-solving a key soft skill?", "answers": ["Improves coding", "Resolves issues", "Ensures compliance", "Upgrades hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "How does adaptability benefit IT apprentices?", "answers": ["Enhances coding", "Handles change", "Ensures compliance", "Upgrades hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a benefit of teamwork for apprentices?", "answers": ["Improves coding", "Enhances collaboration", "Ensures compliance", "Upgrades hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "Why is time management a soft skill?", "answers": ["Improves coding", "Balances tasks", "Ensures compliance", "Upgrades hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "How can communication skills aid career growth?", "answers": ["By improving coding", "By building relationships", "By ensuring compliance", "By upgrading hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a challenge of developing soft skills?", "answers": ["Software bugs", "Consistent practice", "Legal issues", "Hardware failures"], "correct": 1 },
+  { "lf": "LF01", "question": "How do soft skills impact workplace dynamics?", "answers": ["Improve coding", "Enhance teamwork", "Ensure compliance", "Upgrade hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a key takeaway from Unit 3?", "answers": ["Coding is primary", "Apprenticeships build skills", "Compliance is key", "Hardware is essential"], "correct": 1 },
+  { "lf": "LF01", "question": "Why is understanding tasks important?", "answers": ["Improves coding", "Enhances performance", "Ensures compliance", "Upgrades hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "How does mentorship support apprentices?", "answers": ["By improving coding", "By providing guidance", "By ensuring compliance", "By upgrading hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a benefit of networking in apprenticeships?", "answers": ["Improves coding", "Builds connections", "Ensures compliance", "Upgrades hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "Why address challenges during apprenticeships?", "answers": ["Improves coding", "Ensures success", "Ensures compliance", "Upgrades hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "How do soft skills aid apprentices?", "answers": ["By improving coding", "By enhancing employability", "By ensuring compliance", "By upgrading hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "Why is communication critical for apprentices?", "answers": ["Improves coding", "Enhances teamwork", "Ensures compliance", "Upgrades hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a responsibility of IT apprentices?", "answers": ["Software coding", "Professionalism", "Legal compliance", "Hardware design"], "correct": 1 },
+  { "lf": "LF01", "question": "How does career development benefit apprentices?", "answers": ["Improves coding", "Offers opportunities", "Ensures compliance", "Upgrades hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "Why are apprenticeships valuable for IT careers?", "answers": ["Improve coding", "Build foundations", "Ensure compliance", "Upgrade hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is the focus of Unit 4?", "answers": ["Software development", "IT workplace policies", "Network security", "Hardware troubleshooting"], "correct": 1 },
+  { "lf": "LF01", "question": "Which material is included in Unit 4?", "answers": ["Case studies", "Articles", "Legal documents", "Hardware manuals"], "correct": 1 },
+  { "lf": "LF01", "question": "How do comprehension checks aid Unit 4?", "answers": ["Teach coding", "Test policy knowledge", "Provide legal advice", "Enhance hardware skills"], "correct": 1 },
+  { "lf": "LF01", "question": "What role do debates play in Unit 4?", "answers": ["Teach coding", "Discuss policy challenges", "Provide legal advice", "Enhance hardware skills"], "correct": 1 },
+  { "lf": "LF01", "question": "Why are keywords important in Unit 4?", "answers": ["Teach programming", "Summarize policy concepts", "Provide legal advice", "Improve hardware skills"], "correct": 1 },
+  { "lf": "LF01", "question": "How do mind maps help in Unit 4?", "answers": ["Teach coding", "Organize policy info", "Provide legal advice", "Enhance hardware skills"], "correct": 1 },
+  { "lf": "LF01", "question": "What is the benefit of podcasts in Unit 4?", "answers": ["Teach coding", "Provide audio learning", "Provide legal advice", "Enhance hardware skills"], "correct": 1 },
+  { "lf": "LF01", "question": "How do writing exercises benefit Unit 4?", "answers": ["Teach coding", "Improve policy communication", "Provide legal advice", "Enhance hardware skills"], "correct": 1 },
+  { "lf": "LF01", "question": "What role do dialogues play in Unit 4?", "answers": ["Teach coding", "Practice policy discussions", "Provide legal advice", "Enhance hardware skills"], "correct": 1 },
+  { "lf": "LF01", "question": "Why are videos included in Unit 4?", "answers": ["Teach coding", "Show policy applications", "Provide legal advice", "Enhance hardware skills"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a learning objective of Unit 4?", "answers": ["Learn coding", "Understand workplace policies", "Teach legal compliance", "Enhance hardware skills"], "correct": 1 },
+  { "lf": "LF01", "question": "Why are IT policies important?", "answers": ["Improve coding", "Ensure consistency", "Ensure compliance", "Enhance hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a focus of workplace safety policies?", "answers": ["Software updates", "Employee protection", "Legal compliance", "Hardware upgrades"], "correct": 1 },
+  { "lf": "LF01", "question": "How do security policies impact IT operations?", "answers": ["Improve coding", "Protect data", "Ensure compliance", "Enhance hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "Why understand ethical policies in IT?", "answers": ["Improve coding", "Guide behavior", "Ensure compliance", "Enhance hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a benefit of clear policies?", "answers": ["Improves coding", "Enhances clarity", "Ensures compliance", "Enhances hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "How do policies ensure compliance?", "answers": ["By improving coding", "By setting standards", "By ensuring legal compliance", "By enhancing hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "Why is policy communication important?", "answers": ["Improves coding", "Ensures adherence", "Ensures compliance", "Enhances hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a challenge of implementing policies?", "answers": ["Software bugs", "Employee adherence", "Legal issues", "Hardware failures"], "correct": 1 },
+  { "lf": "LF01", "question": "How do policies support IT workplaces?", "answers": ["By improving coding", "By providing structure", "By ensuring compliance", "By enhancing hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a common IT workplace policy?", "answers": ["Software updates", "Data security", "Legal contracts", "Hardware specs"], "correct": 1 },
+  { "lf": "LF01", "question": "Why is data security critical in IT?", "answers": ["Improves coding", "Protects information", "Ensures compliance", "Enhances hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is an example of a safety policy?", "answers": ["Software updates", "Ergonomic guidelines", "Legal compliance", "Hardware upgrades"], "correct": 1 },
+  { "lf": "LF01", "question": "How do ethical policies guide employees?", "answers": ["By improving coding", "By setting standards", "By ensuring compliance", "By enhancing hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "Why are acceptable use policies important?", "answers": ["Improve coding", "Regulate technology use", "Ensure compliance", "Enhance hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a goal of safety policies?", "answers": ["Improve coding", "Protect employees", "Ensure compliance", "Enhance hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "How do security policies prevent breaches?", "answers": ["By improving coding", "By setting protocols", "By ensuring compliance", "By enhancing hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "Why are ethical policies necessary?", "answers": ["Improve coding", "Ensure integrity", "Ensure compliance", "Enhance hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What regulates technology use in IT?", "answers": ["Software updates", "Acceptable use policies", "Legal contracts", "Hardware specs"], "correct": 1 },
+  { "lf": "LF01", "question": "How do policies enhance workplace safety?", "answers": ["By improving coding", "By setting guidelines", "By ensuring compliance", "By enhancing hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a procedure in IT workplaces?", "answers": ["Software code", "Step-by-step process", "Legal contract", "Hardware spec"], "correct": 1 },
+  { "lf": "LF01", "question": "Why are procedures important for tasks?", "answers": ["Improve coding", "Ensure consistency", "Ensure compliance", "Enhance hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is an example of an IT procedure?", "answers": ["Software coding", "Incident reporting", "Legal compliance", "Hardware design"], "correct": 1 },
+  { "lf": "LF01", "question": "How do procedures improve efficiency?", "answers": ["By improving coding", "By standardizing tasks", "By ensuring compliance", "By enhancing hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "Why document procedures in IT?", "answers": ["Improve coding", "Ensure clarity", "Ensure compliance", "Enhance hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a benefit of incident reporting?", "answers": ["Improves coding", "Enhances security", "Ensures compliance", "Enhances hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "How do procedures support compliance?", "answers": ["By improving coding", "By setting standards", "By ensuring legal compliance", "By enhancing hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "Why are clear procedures important?", "answers": ["Improve coding", "Reduce errors", "Ensure compliance", "Enhance hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "How do procedures aid new employees?", "answers": ["By improving coding", "By providing guidance", "By ensuring compliance", "By enhancing hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a goal of IT procedures?", "answers": ["Improve coding", "Ensure efficiency", "Ensure compliance", "Enhance hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "Why is policy training important for employees?", "answers": ["Improves coding", "Ensures adherence", "Ensures compliance", "Enhances hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "How does training enhance policy understanding?", "answers": ["By improving coding", "By explaining rules", "By ensuring compliance", "By enhancing hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a method for policy training?", "answers": ["Software updates", "Workshops", "Legal contracts", "Hardware specs"], "correct": 1 },
+  { "lf": "LF01", "question": "Why is regular training necessary?", "answers": ["Improves coding", "Updates knowledge", "Ensures compliance", "Enhances hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "How does training improve compliance?", "answers": ["By improving coding", "By ensuring adherence", "By ensuring legal compliance", "By enhancing hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a benefit of policy workshops?", "answers": ["Improves coding", "Enhances understanding", "Ensures compliance", "Enhances hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "How does training reduce workplace risks?", "answers": ["By improving coding", "By educating employees", "By ensuring compliance", "By enhancing hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "Why include real-world scenarios in training?", "answers": ["Improve coding", "Enhance application", "Ensure compliance", "Enhance hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "How does training support new employees?", "answers": ["By improving coding", "By providing guidance", "By ensuring compliance", "By enhancing hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a goal of policy training?", "answers": ["Improve coding", "Ensure adherence", "Ensure compliance", "Enhance hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a consequence of policy non-compliance?", "answers": ["Improved coding", "Disciplinary action", "Legal compliance", "Enhanced hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "How can non-compliance impact IT operations?", "answers": ["Improve coding", "Cause breaches", "Ensure compliance", "Enhance hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "Why is reporting non-compliance important?", "answers": ["Improves coding", "Addresses issues", "Ensures compliance", "Enhances hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is an example of non-compliance?", "answers": ["Software updates", "Unauthorized access", "Legal compliance", "Hardware upgrades"], "correct": 1 },
+  { "lf": "LF01", "question": "How can companies address non-compliance?", "answers": ["By improving coding", "Through investigations", "By ensuring compliance", "By enhancing hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "Why is disciplinary action used?", "answers": ["Improves coding", "Enforces policies", "Ensures compliance", "Enhances hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "How does non-compliance affect trust?", "answers": ["Improves coding", "Undermines trust", "Ensures compliance", "Enhances hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a risk of data breaches?", "answers": ["Improved coding", "Reputational damage", "Legal compliance", "Enhanced hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "Why investigate non-compliance incidents?", "answers": ["Improve coding", "Identify causes", "Ensure compliance", "Enhance hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "How can policy adherence be encouraged?", "answers": ["By improving coding", "Through training", "By ensuring compliance", "By enhancing hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "Why are ethical policies important in IT?", "answers": ["Improve coding", "Ensure integrity", "Ensure compliance", "Enhance hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is an example of an ethical dilemma?", "answers": ["Software bugs", "Data privacy decisions", "Legal compliance", "Hardware failures"], "correct": 1 },
+  { "lf": "LF01", "question": "How do ethical policies guide decisions?", "answers": ["By improving coding", "By setting standards", "By ensuring compliance", "By enhancing hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "Why is transparency important in ethics?", "answers": ["Improves coding", "Builds trust", "Ensures compliance", "Enhances hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a benefit of ethical behavior?", "answers": ["Improves coding", "Enhances reputation", "Ensures compliance", "Enhances hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "How do ethical policies prevent conflicts?", "answers": ["By improving coding", "By guiding behavior", "By ensuring compliance", "By enhancing hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "Why address ethical dilemmas promptly?", "answers": ["Improves coding", "Maintains integrity", "Ensures compliance", "Enhances hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "How does ethics training benefit employees?", "answers": ["Improves coding", "Enhances decision-making", "Ensures compliance", "Enhances hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a consequence of unethical behavior?", "answers": ["Improved coding", "Reputational damage", "Legal compliance", "Enhanced hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "Why are ethical policies critical for trust?", "answers": ["Improve coding", "Build confidence", "Ensure compliance", "Enhance hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a key takeaway from Unit 4?", "answers": ["Coding is key", "Policies ensure consistency", "Compliance is optional", "Hardware is primary"], "correct": 1 },
+  { "lf": "LF01", "question": "Why are procedures important in IT?", "answers": ["Improve coding", "Standardize tasks", "Ensure compliance", "Enhance hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "How do policies enhance workplace safety?", "answers": ["By improving coding", "By setting guidelines", "By ensuring compliance", "By enhancing hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "Why is training critical for policy adherence?", "answers": ["Improves coding", "Ensures understanding", "Ensures compliance", "Enhances hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a benefit of ethical policies?", "answers": ["Improves coding", "Ensures integrity", "Ensures compliance", "Enhances hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "How do procedures reduce errors?", "answers": ["By improving coding", "By providing clarity", "By ensuring compliance", "By enhancing hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "Why address non-compliance promptly?", "answers": ["Improves coding", "Prevents breaches", "Ensures compliance", "Enhances hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "How do policies support IT operations?", "answers": ["By improving coding", "By providing structure", "By ensuring compliance", "By enhancing hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "What is a goal of IT procedures?", "answers": ["Improve coding", "Ensure efficiency", "Ensure compliance", "Enhance hardware"], "correct": 1 },
+  { "lf": "LF01", "question": "Why are ethical policies essential?", "answers": ["Improve coding", "Maintain integrity", "Ensure compliance", "Enhance hardware"], "correct": 1 }
+];
+
+
+let filteredQuestions = [];
+let currentQuestion = 0;
+let score = 0;
+let answeredCount = 0;
+let correctCount = 0;
+let incorrectCount = 0;
+
+const questionEl = document.getElementById("question");
+const answersEl = document.getElementById("answers");
+const scoreEl = document.getElementById("score");
+const statsEl = document.getElementById("stats");
+const feedbackEl = document.getElementById("feedback");
+const nextBtn = document.getElementById("next-btn");
+const progressEl = document.getElementById("progress");
+const lfFilter = document.getElementById("lf-filter");
+
+lfFilter.addEventListener("change", () => {
+  startQuiz();
+});
+
+function startQuiz() {
+  const selectedLF = lfFilter.value;
+  filteredQuestions = selectedLF === "all"
+    ? [...allQuestions]
+    : allQuestions.filter(q => q.lf === selectedLF);
+
+  shuffleArray(filteredQuestions);
+  currentQuestion = 0;
+  score = 0;
+  answeredCount = 0;
+  correctCount = 0;
+  incorrectCount = 0;
+  updateStats();
+  feedbackEl.textContent = "";
+  feedbackEl.className = "";
+  nextBtn.style.display = "none";
+  loadQuestion();
+}
+
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+}
+
+function loadQuestion() {
+  if (filteredQuestions.length === 0 || currentQuestion >= filteredQuestions.length) {
+    questionEl.textContent = "Keine Fragen für diese Auswahl gefunden.";
+    answersEl.innerHTML = `<button onclick="startQuiz()" style="background-color: #007bff;">Erneut versuchen</button>`;
+    progressEl.textContent = "Frage 0 von 0";
+    nextBtn.style.display = "none";
+    updateStats();
+    feedbackEl.textContent = "";
+    return;
+  }
+  const q = filteredQuestions[currentQuestion];
+  questionEl.textContent = q.question;
+  answersEl.innerHTML = "";
+  q.answers.forEach((ans, index) => {
+    const btn = document.createElement("button");
+    btn.textContent = ans;
+    btn.className = "answer";
+    btn.onclick = () => selectAnswer(btn, index);
+    answersEl.appendChild(btn);
+  });
+  progressEl.textContent = `Frage ${currentQuestion + 1} von ${filteredQuestions.length}`;
+  nextBtn.style.display = "none";
+  feedbackEl.textContent = "";
+  feedbackEl.className = "";
+}
+
+function selectAnswer(selectedButton, index) {
+  const q = filteredQuestions[currentQuestion];
+  const correctIndex = q.correct;
+  const buttons = answersEl.getElementsByClassName("answer");
+
+  // Disable all buttons after an answer is selected
+  for (let btn of buttons) {
+    btn.disabled = true;
+    btn.classList.add("disabled");
+  }
+
+  answeredCount++;
+  if (index === correctIndex) {
+    score++;
+    correctCount++;
+    selectedButton.classList.add("correct");
+    feedbackEl.textContent = "Richtig!";
+    feedbackEl.className = "correct";
+  } else {
+    incorrectCount++;
+    selectedButton.classList.add("incorrect");
+    buttons[correctIndex].classList.add("correct");
+    feedbackEl.textContent = `Falsch! Die richtige Antwort ist: "${q.answers[correctIndex]}"`;
+    feedbackEl.className = "incorrect";
+  }
+
+  updateStats();
+  nextBtn.style.display = "block";
+  nextBtn.focus();
+}
+
+nextBtn.onclick = () => {
+    currentQuestion++;
+    if (currentQuestion < filteredQuestions.length) {
+      loadQuestion();
+    } else {
+      showResults();
+    }
+};
+
+function showResults() {
+  questionEl.textContent = "Quiz beendet!";
+  answersEl.innerHTML = `<button onclick="startQuiz()" style="background-color: #007bff;">Neu starten</button>`;
+  progressEl.textContent = `Frage ${filteredQuestions.length} von ${filteredQuestions.length}`;
+  feedbackEl.textContent = `Dein Endergebnis: ${correctCount} von ${answeredCount} richtig.`;
+  feedbackEl.className = "";
+  nextBtn.style.display = "none";
+}
+
+function updateStats() {
+    scoreEl.textContent = `Punktestand: ${score}`;
+    statsEl.textContent = `Beantwortet: ${answeredCount} | Richtig: ${correctCount} | Falsch: ${incorrectCount}`;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  startQuiz();
+});
+</script>
+</body>
+</html>
